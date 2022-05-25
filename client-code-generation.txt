@@ -1,0 +1,1 @@
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i /local/auction-swagger.json -g typescript-angular -o /local/src --global-property models
