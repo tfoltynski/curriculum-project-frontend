@@ -1,0 +1,79 @@
+{
+    "products": {
+      "currentPage": 1,
+      "pageSize": 10,
+      "totalPages": 1,
+      "totalCount": 1,
+      "hasPrevious": false,
+      "hasNext": false,
+      "results": [
+        {
+          "productId": "627ff3aa0c7362bf8e7f6df5",
+          "productName": "Product1",
+          "shortDescription": "string",
+          "detailedDescription": "string",
+          "categoryType": "Sculptor",
+          "startingPrice": 15,
+          "bidEndDate": "2099-05-19T09:23:34.088",
+          "userId": 1,
+          "sellerInformation": {
+            "userId": 1,
+            "email": "first@email.com",
+            "firstName": "Johnny",
+            "lastName": "string",
+            "address": "string",
+            "city": "string",
+            "state": "string",
+            "pin": "string",
+            "phone": "1111111111",
+            "createdDate": "2022-05-14T18:23:38.0527873",
+            "updatedDate": null
+          },
+          "bids": [
+            {
+              "bidId": 1,
+              "amount": 1000,
+              "userId": 1,
+              "productId": "627ff3aa0c7362bf8e7f6df5",
+              "buyerInformation": {
+                "userId": 1,
+                "email": "first@email.com",
+                "firstName": "Johnny",
+                "lastName": "string",
+                "address": "string",
+                "city": "string",
+                "state": "string",
+                "pin": "string",
+                "phone": "1111111111",
+                "createdDate": "2022-05-14T18:23:38.0527873",
+                "updatedDate": null
+              },
+              "createdDate": "2022-05-14T18:25:58.0588846",
+              "updatedDate": "2022-05-14T18:41:27.2084799"
+            },
+            {
+              "bidId": 2,
+              "amount": 500,
+              "userId": 2,
+              "productId": "627ff3aa0c7362bf8e7f6df5",
+              "buyerInformation": {
+                "userId": 2,
+                "email": "second@email.com",
+                "firstName": "Will",
+                "lastName": "string",
+                "address": "string",
+                "city": "string",
+                "state": "string",
+                "pin": "string",
+                "phone": "1111111111",
+                "createdDate": "2022-05-14T18:23:38.0527873",
+                "updatedDate": null
+              },
+              "createdDate": "2022-05-14T18:25:58.0588846",
+              "updatedDate": "2022-05-14T18:41:27.2084799"
+            }
+          ]
+        }
+      ]
+    }
+  }

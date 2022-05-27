@@ -1,1 +1,4 @@
 docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i /local/auction-swagger.json -g typescript-angular -o /local/src --global-property models
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i /local/auction-view-swagger.json -g typescript-angular -o /local/src --global-property models
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i /local/auction-swagger.json -g typescript-angular -o /local/cypress --global-property models
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i /local/auction-view-swagger.json -g typescript-angular -o /local/cypress --global-property models

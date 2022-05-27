@@ -3,7 +3,7 @@ module.exports = function (app) {
   app.use(
     '/auction/',
     createProxyMiddleware({
-      target: `${process.env.REACT_APP_AUCTION_API_URL}`,
+      target: process.env.REACT_APP_AUCTION_API_URL,
       pathRewrite: {'^/auction/' : ''},
       changeOrigin: true,
     })

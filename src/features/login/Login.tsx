@@ -61,6 +61,7 @@ const Login = () => {
       <Stack id="login-buttons" gap={3} className="col-md-3">
         {userDataSource.map((x) => (
           <Button
+            key={x.email}
             type="button"
             onClick={setUser(x.email)}
           >{`${x.firstName} ${x.lastName} (${x.email})`}</Button>

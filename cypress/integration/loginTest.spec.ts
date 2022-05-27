@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
 /// <reference types="cypress" />
 
-describe('Login related suite', () => {
-  it('Login works', () => {
+describe('Login suite', () => {
+  it('Login', () => {
     cy.visit('/');
     cy.contains('Login');
 
@@ -16,7 +16,7 @@ describe('Login related suite', () => {
       });
   });
 
-  it('Logout works', () => {
+  it('Logout', () => {
     cy.visit('/');
     cy.contains('h2', 'Login');
 

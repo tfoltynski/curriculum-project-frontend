@@ -17,7 +17,7 @@ const SelectProduct = (props: SelectProductProps) => {
     props.onChangeProduct(event.target.value);
   }
 
-  return <Form.Select aria-label="Select product" onChange={changeProductHandler} value={props.value}>
+  return <Form.Select id="selectProduct" aria-label="Select product" onChange={changeProductHandler} value={props.value}>
       <option>Select product...</option>
       {props.products?.map(m => <option key={m.productId} value={m.productId}>{m.productName}</option>)}
     </Form.Select>
