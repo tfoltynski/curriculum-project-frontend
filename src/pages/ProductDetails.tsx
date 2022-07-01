@@ -7,17 +7,18 @@ import React, {
   useState,
 } from 'react';
 import { Button, Col, Form, Row, Stack } from 'react-bootstrap';
-import { Category } from '../../model/category';
-import { CreateProductCommand } from '../../model/createProductCommand';
-import { ShowProductsResponse } from '../../model/showProductsResponse';
-import { ShowProductsResponseProductDto } from '../../model/showProductsResponseProductDto';
-import Bids, { BidDto } from './Bids';
-import AuctionField from './AuctionField';
-import SelectProduct, { SelectProductDto } from './SelectProduct';
+import { Category } from '../model/category';
+import { CreateProductCommand } from '../model/createProductCommand';
+import { ShowProductsResponse } from '../model/showProductsResponse';
+import { ShowProductsResponseProductDto } from '../model/showProductsResponseProductDto';
+import Bids, { BidDto } from '../components/product/Bids';
+import AuctionField from '../components/product/AuctionField';
+import SelectProduct, { SelectProductDto } from '../components/product/SelectProduct';
 import { toast } from 'react-toastify';
-import { ShowProductsResponseBidDto } from '../../model/showProductsResponseBidDto';
-import { ShowProductDetailsResponse } from '../../model/showProductDetailsResponse';
-import { UserContext } from '../login/UserContext';
+import { ShowProductsResponseBidDto } from '../model/showProductsResponseBidDto';
+import { ShowProductDetailsResponse } from '../model/showProductDetailsResponse';
+import { UserContext } from '../context/UserContext';
+import callApi from '../utils/fetchAbsolute';
 
 type ProductDetailsProps = {
   onProductCreated?: () => void;
@@ -80,7 +81,7 @@ const ProductDetails = (props: ProductDetailsProps) => {
         state: userContext.user?.state,
       },
     };
-    var response = await fetch('/auction/api/v1/seller/add-product', {
+    var response = await callApi('/auction/api/v1/seller/add-product', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,8 +126,8 @@ const ProductDetails = (props: ProductDetailsProps) => {
       });
       return;
     }
-    var response = await fetch(
-      `/auction/api/v1/seller/delete/${product.productId}`,
+    var response = await callApi(
+      `/delete-function/delete/${product.productId}`,
       {
         method: 'POST',
       }
@@ -149,7 +150,7 @@ const ProductDetails = (props: ProductDetailsProps) => {
   };
 
   const fetchProducts = useCallback(async () => {
-    const response = await fetch('/auctionview/api/v1/seller/show-products');
+    const response = await callApi('/auctionview/api/v1/seller/show-products');
     if (response.ok) {
       const productList: ShowProductsResponse = await response.json();
       setProductList(productList.products?.results ?? []);
@@ -162,7 +163,7 @@ const ProductDetails = (props: ProductDetailsProps) => {
   }, []);
 
   const changeProductHandler = async (productId: string) => {
-    const response = await fetch(
+    const response = await callApi(
       `/auctionview/api/v1/seller/show-product/${productId}`
     );
     if (response.ok) {

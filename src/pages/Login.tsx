@@ -1,7 +1,9 @@
+import { useIsAuthenticated } from '@azure/msal-react';
 import { useContext } from 'react';
 import { Button, Col, Row, Stack } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { UserContext, UserDto } from './UserContext';
+import { SignInButton } from '../components/login/SignInButton';
+import { UserContext, UserDto } from '../context/UserContext';
 
 const userDataSource: UserDto[] = [
   {
@@ -38,6 +40,7 @@ const userDataSource: UserDto[] = [
 
 const Login = () => {
   const userContext = useContext(UserContext);
+  const isAuthenticated = useIsAuthenticated();
   const navigate = useNavigate();
 
   const setUser = (userEmail: string) => () => {
@@ -54,6 +57,9 @@ const Login = () => {
         <Col>
           <h2>Login</h2>
         </Col>
+      </Row>
+      <Row>
+        { isAuthenticated ? <span>Signed In</span> : <SignInButton /> }
       </Row>
       <Row>
         <Col>Select a user:</Col>

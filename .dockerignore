@@ -1,0 +1,11 @@
+/node_modules
+/build
+/.nyc_output
+/.vs
+/coverage
+/cypress
+/mochawesome-report
+/out
+.git
+*.md
+.gitignore

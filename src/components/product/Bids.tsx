@@ -1,8 +1,10 @@
 import { useContext, useState } from 'react';
 import { Button, Form, Stack, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import callApi, { callApiWithToken } from '../../utils/fetchAbsolute';
+import { useAuthToken } from '../../hooks/useAuthToken';
 import { PlaceBidCommand } from '../../model/placeBidCommand';
-import { UserContext } from '../login/UserContext';
+import { UserContext } from '../../context/UserContext';
 import AuctionField from './AuctionField';
 
 type BidsProps = {
@@ -23,6 +25,7 @@ const Bids = (props: BidsProps) => {
   const [selectedBidEmail, setSelectedBidEmail] = useState<string | null>(null);
   const [amount, setAmount] = useState(0);
   const userContext = useContext(UserContext);
+  const authToken = useAuthToken();
 
   const onChangeBidAmount = (value: string | number) => {
     setAmount(value as number);
@@ -61,7 +64,7 @@ const Bids = (props: BidsProps) => {
       });
       return;
     }
-    var response = await fetch(
+    var response = await callApi(
       `/auction/api/v1/buyer/update-bid/${props.selectedProductId}/${selectedBidEmail}/${amount}`,
       {
         method: 'POST',
@@ -89,7 +92,7 @@ const Bids = (props: BidsProps) => {
       pin: userContext.user?.pin,
       state: userContext.user?.state,
     };
-    var response = await fetch(`/auction/api/v1/buyer/place-bid`, {
+    var response = await callApiWithToken(authToken!,`/auction/api/v1/buyer/place-bid`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

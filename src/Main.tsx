@@ -1,11 +1,11 @@
 import { useContext } from 'react';
 import logo from './logo.svg';
 import { Button, Container, Stack } from 'react-bootstrap';
-import ProductDetails from './features/product/ProductDetails';
+import ProductDetails from './pages/ProductDetails';
 import { ToastContainer } from 'react-toastify';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { UserContext } from './features/login/UserContext';
-import Login from './features/login/Login';
+import { UserContext } from './context/UserContext';
+import Login from './pages/Login';
 
 const Main = () => {
   const navigate = useNavigate();
