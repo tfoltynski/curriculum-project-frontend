@@ -13,21 +13,26 @@ import { ShowProductsResponse } from '../model/showProductsResponse';
 import { ShowProductsResponseProductDto } from '../model/showProductsResponseProductDto';
 import Bids, { BidDto } from '../components/product/Bids';
 import AuctionField from '../components/product/AuctionField';
-import SelectProduct, { SelectProductDto } from '../components/product/SelectProduct';
+import SelectProduct, {
+  SelectProductDto,
+} from '../components/product/SelectProduct';
 import { toast } from 'react-toastify';
 import { ShowProductsResponseBidDto } from '../model/showProductsResponseBidDto';
 import { ShowProductDetailsResponse } from '../model/showProductDetailsResponse';
 import { UserContext } from '../context/UserContext';
 import callApi from '../utils/fetchAbsolute';
+import { createSignalRContext } from 'react-signalr';
+import Configuration from '../configuration/Configuration';
+import { ProductHubEvents } from '../hubs/ProductHubEvents';
+import { ProductHubCommands } from '../hubs/ProductHubCommands';
 
 type ProductDetailsProps = {
   onProductCreated?: () => void;
 };
 
+const AuctionViewWebSocketContext = createSignalRContext();
+
 const ProductDetails = (props: ProductDetailsProps) => {
-  // const [productName, setProductName] = useState<string | null>(null);
-  // const [shortDescription, setShortDescription] = useState<string | null>(null);
-  // const [detailedDescription, setDetailedDescription] = useState<string | null>(null);
   const [product, setProduct] = useState<ShowProductsResponseProductDto>(
     {} as ShowProductsResponseProductDto
   );
@@ -62,6 +67,29 @@ const ProductDetails = (props: ProductDetailsProps) => {
     setProduct({ ...product, bidEndDate: value as string });
   };
 
+  AuctionViewWebSocketContext.useSignalREffect(
+    ProductHubEvents.ProductCreated,
+    (productDto: ShowProductDetailsResponse) => {
+      setProduct(productDto);
+    },
+    [productList]
+  );
+
+  AuctionViewWebSocketContext.useSignalREffect(
+    ProductHubEvents.RefreshProductDropdown,
+    (productDto: ShowProductDetailsResponse) => {
+      setProductList([...productList, productDto]);
+    },
+    [productList]
+  );
+
+  const subscribeUserToCreateProductEvent = async (user: string) => {
+    await AuctionViewWebSocketContext.invoke(
+      ProductHubCommands.JoinUserGroup,
+      user
+    );
+  };
+
   const createProductHandler = async () => {
     const createProductCommand: CreateProductCommand = {
       bidEndDate: product.bidEndDate,
@@ -88,25 +116,18 @@ const ProductDetails = (props: ProductDetailsProps) => {
       },
       body: JSON.stringify(createProductCommand),
     });
+    if (product.sellerInformation?.email != null) {
+      subscribeUserToCreateProductEvent(product.sellerInformation?.email);
+    }
     if (response.ok) {
       const productId = await response.text();
-      const productDto = { ...product };
-      productDto.productId = productId;
-      productDto.bidEndDate = new Date(productDto.bidEndDate!).toJSON();
-      productDto.sellerInformation = {
-        address: userContext.user?.address,
-        city: userContext.user?.city,
-        email: userContext.user?.email,
-        firstName: userContext.user?.firstName,
-        lastName: userContext.user?.lastName,
-        phone: userContext.user?.phone,
-        pin: userContext.user?.pin,
-        state: userContext.user?.state,
+      const productDto: ShowProductsResponseProductDto = {
+        productName: product.productName,
+        productId: productId,
       };
-      setProductList([...productList, productDto]);
       setProduct(productDto);
       toast(`Product created '${productDto.productName}'`, {
-        type: 'info',
+        type: 'success',
       });
       if (props.onProductCreated) {
         props.onProductCreated();
@@ -228,110 +249,114 @@ const ProductDetails = (props: ProductDetailsProps) => {
   };
 
   return (
-    <Fragment>
-      <Row>
-        <Col>
-          <h2>Product</h2>
-        </Col>
-        <Col>
-          <SelectProduct
-            onChangeProduct={changeProductHandler}
-            value={product.productId === null ? undefined : product.productId}
-            products={productList?.map<SelectProductDto>((x) => ({
-              productId: x.productId!,
-              productName: x.productName!,
-            }))}
-          ></SelectProduct>
-        </Col>
-      </Row>
-      <Form>
+    <AuctionViewWebSocketContext.Provider
+      url={`${Configuration.AuctionViewAPIUrl}/hubs/product`}
+    >
+      <Fragment>
         <Row>
-          <AuctionField
-            controlId={'productNameId'}
-            label={'Product name'}
-            onChange={onChangeProductName}
-            value={product.productName!}
-          ></AuctionField>
+          <Col>
+            <h2>Product</h2>
+          </Col>
+          <Col>
+            <SelectProduct
+              onChangeProduct={changeProductHandler}
+              value={product.productId === null ? undefined : product.productId}
+              products={productList?.map<SelectProductDto>((x) => ({
+                productId: x.productId!,
+                productName: x.productName!,
+              }))}
+            ></SelectProduct>
+          </Col>
         </Row>
-        <Row>
-          <AuctionField
-            controlId={'shortDescriptionId'}
-            label={'Short description'}
-            onChange={onChangeShortDescription}
-            value={product.shortDescription!}
-          ></AuctionField>
-        </Row>
-        <Row>
-          <AuctionField
-            controlId={'detailedDescriptionId'}
-            label={'Detailed description'}
-            onChange={onChangeDetailedDescription}
-            value={product.detailedDescription!}
-          ></AuctionField>
-        </Row>
-        <Row>
-          <Form.Group className="mb-3" controlId={'categoryId'}>
-            <Form.Label>Category</Form.Label>
-            <Form.Select
-              aria-label="Select category"
-              onChange={onChangeCategory}
-              value={product.categoryType}
+        <Form>
+          <Row>
+            <AuctionField
+              controlId={'productNameId'}
+              label={'Product name'}
+              onChange={onChangeProductName}
+              value={product.productName!}
+            ></AuctionField>
+          </Row>
+          <Row>
+            <AuctionField
+              controlId={'shortDescriptionId'}
+              label={'Short description'}
+              onChange={onChangeShortDescription}
+              value={product.shortDescription!}
+            ></AuctionField>
+          </Row>
+          <Row>
+            <AuctionField
+              controlId={'detailedDescriptionId'}
+              label={'Detailed description'}
+              onChange={onChangeDetailedDescription}
+              value={product.detailedDescription!}
+            ></AuctionField>
+          </Row>
+          <Row>
+            <Form.Group className="mb-3" controlId={'categoryId'}>
+              <Form.Label>Category</Form.Label>
+              <Form.Select
+                aria-label="Select category"
+                onChange={onChangeCategory}
+                value={product.categoryType}
+              >
+                {categories?.map((m) => (
+                  <option key={m.toString()} value={m.toString()}>
+                    {m.toString()}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Row>
+          <Row>
+            <AuctionField
+              controlId={'startingPriceId'}
+              label={'Starting price'}
+              onChange={onChangeStartingPrice}
+              value={product.startingPrice}
+            ></AuctionField>
+          </Row>
+          <Row>
+            <AuctionField
+              controlId={'bidEndDateId'}
+              label={'Bid end date'}
+              placeholder={'e.g. 2022-05-31T18:00:00'}
+              onChange={onChangeBidEndDate}
+              value={product.bidEndDate}
+            ></AuctionField>
+          </Row>
+          <Stack direction="horizontal" gap={3}>
+            <Button
+              variant="danger"
+              className="ms-auto"
+              type="button"
+              onClick={deleteProductHandler}
             >
-              {categories?.map((m) => (
-                <option key={m.toString()} value={m.toString()}>
-                  {m.toString()}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-        </Row>
-        <Row>
-          <AuctionField
-            controlId={'startingPriceId'}
-            label={'Starting price'}
-            onChange={onChangeStartingPrice}
-            value={product.startingPrice}
-          ></AuctionField>
-        </Row>
-        <Row>
-          <AuctionField
-            controlId={'bidEndDateId'}
-            label={'Bid end date'}
-            placeholder={'e.g. 2022-05-31T18:00:00'}
-            onChange={onChangeBidEndDate}
-            value={product.bidEndDate}
-          ></AuctionField>
-        </Row>
-        <Stack direction="horizontal" gap={3}>
-          <Button
-            variant="danger"
-            className="ms-auto"
-            type="button"
-            onClick={deleteProductHandler}
-          >
-            Delete product
-          </Button>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={createProductHandler}
-          >
-            Create product
-          </Button>
-        </Stack>
-      </Form>
-      <Bids
-        onBidPlaced={placeBidHandler}
-        onUpdateBid={updateBidHandler}
-        selectedProductId={product.productId}
-        bids={product.bids?.map<BidDto>((x) => ({
-          Amount: x.amount!,
-          Name: x.buyerInformation!.firstName!,
-          Email: x.buyerInformation!.email!,
-          Mobile: x.buyerInformation!.phone!,
-        }))}
-      ></Bids>
-    </Fragment>
+              Delete product
+            </Button>
+            <Button
+              variant="primary"
+              type="button"
+              onClick={createProductHandler}
+            >
+              Create product
+            </Button>
+          </Stack>
+        </Form>
+        <Bids
+          onBidPlaced={placeBidHandler}
+          onUpdateBid={updateBidHandler}
+          selectedProductId={product.productId}
+          bids={product.bids?.map<BidDto>((x) => ({
+            Amount: x.amount!,
+            Name: x.buyerInformation!.firstName!,
+            Email: x.buyerInformation!.email!,
+            Mobile: x.buyerInformation!.phone!,
+          }))}
+        ></Bids>
+      </Fragment>
+    </AuctionViewWebSocketContext.Provider>
   );
 };
 
